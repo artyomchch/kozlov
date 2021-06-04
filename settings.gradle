@@ -1,0 +1,2 @@
+rootProject.name = "Kozlov_task_to_tinkoff"
+include ':app'
