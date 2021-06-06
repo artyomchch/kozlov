@@ -1,5 +1,6 @@
 package kozlov.artyom.kozlov_task_to_tinkoff.mvp
 
+import android.content.Context
 import android.view.View
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -15,6 +16,8 @@ interface MainInterface {
         fun backButtonUsed()
         fun visibleProgressBar()
         fun invisibleProgressBar()
+        fun showError()
+
 
     }
 
@@ -22,6 +25,7 @@ interface MainInterface {
         suspend fun getSecondPost()
         fun getDataPostSource(data: DataStore<Preferences>)
         suspend fun getCashPost()
+
     }
 
     interface Model{

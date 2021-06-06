@@ -38,6 +38,8 @@ class MainActivity : AppCompatActivity(), MainInterface.View {
     //view binding
     private lateinit var binding: ActivityMainBinding
 
+
+
     private val dataStore: DataStore<androidx.datastore.preferences.core.Preferences> by lazy {
         createDataStore(name = "posts")
     }
@@ -62,6 +64,7 @@ class MainActivity : AppCompatActivity(), MainInterface.View {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
 
         presenter = MainPresenter(this)
 
@@ -163,6 +166,7 @@ class MainActivity : AppCompatActivity(), MainInterface.View {
             })
             .fallback(R.drawable.ttrs)
             .load(url)
+            .error(R.drawable.error)
             .into(binding.imageView)
     }
 
@@ -180,6 +184,10 @@ class MainActivity : AppCompatActivity(), MainInterface.View {
 
     override fun invisibleProgressBar() {
         binding.progress.visibility = View.GONE
+    }
+
+    override fun showError() {
+
     }
 
 

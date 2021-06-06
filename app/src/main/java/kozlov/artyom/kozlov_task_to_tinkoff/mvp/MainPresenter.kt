@@ -1,6 +1,12 @@
 package kozlov.artyom.kozlov_task_to_tinkoff.mvp
 
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.beust.klaxon.Klaxon
@@ -25,16 +31,20 @@ class MainPresenter(_view: MainInterface.View): MainInterface.Presenter {
     private var BASE_URL = "https://developerslife.ru/"
     private var counter = -1
     private var casher = -1
+    private lateinit var context: Context
 
 
     private var dataPost: DevopsLife? = null
 
     init {
+
         view.backButtonUnused()
         view.loadDescription()
         view.setTabText()
         getPostFromUrl()
     }
+
+
 
 
     override suspend fun getSecondPost() {
@@ -65,7 +75,10 @@ class MainPresenter(_view: MainInterface.View): MainInterface.Presenter {
             view.backButtonUnused()
         }
 
+
     }
+
+
 
     private suspend fun getPostFromCash(){
 
@@ -76,7 +89,9 @@ class MainPresenter(_view: MainInterface.View): MainInterface.Presenter {
 
         view.setDescription(desc)
         view.setImage(url)
-
+        if (counter >= 0){
+            view.backButtonUsed()
+        }
 
     }
 
@@ -105,8 +120,40 @@ class MainPresenter(_view: MainInterface.View): MainInterface.Presenter {
                     view.setDescription(dataPost!!.description)
                     view.setImage(dataPost!!.gifURL)
                 }
+            }
+            else {
 
             }
         }
     }
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    fun isOnline(context: Context): Boolean {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val capabilities =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+            } else {
+                TODO("VERSION.SDK_INT < M")
+            }
+        if (capabilities != null) {
+            when {
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
+                    return true
+                }
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
+                    return true
+                }
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
 }
