@@ -25,23 +25,28 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.io.StringReader
 
 
+@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 class MainPresenter(_view: MainInterface.View): MainInterface.Presenter {
     private var view: MainInterface.View = _view
     private var model: MainInterface.Model = MainModel()
     private var BASE_URL = "https://developerslife.ru/"
     private var counter = -1
     private var casher = -1
-    private lateinit var context: Context
+
 
 
     private var dataPost: DevopsLife? = null
 
     init {
+       // if (isOnline(context)){
+            view.backButtonUnused()
+            view.loadDescription()
+            view.setTabText()
+            getPostFromUrl()
 
-        view.backButtonUnused()
-        view.loadDescription()
-        view.setTabText()
-        getPostFromUrl()
+
+      //  }
+
     }
 
 
@@ -67,6 +72,7 @@ class MainPresenter(_view: MainInterface.View): MainInterface.Presenter {
     override fun getDataPostSource(data: DataStore<Preferences>){
         model.getDataPostSource(data)
     }
+
 
     override suspend fun getCashPost() {
         counter--
@@ -106,25 +112,30 @@ class MainPresenter(_view: MainInterface.View): MainInterface.Presenter {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(ApiRequests::class.java)
+        if (api == null){
+            view.showErrorForPost()
+        }
+        else{
+            GlobalScope.launch(Dispatchers.IO) {
+                val response: Response<DevopsLife> = api.getRandomPosts().awaitResponse()
+                if (response.isSuccessful){
+                    counter++
+                    dataPost = response.body()!!
 
-        GlobalScope.launch(Dispatchers.IO) {
-            val response: Response<DevopsLife> = api.getRandomPosts().awaitResponse()
-            if (response.isSuccessful){
-                counter++
-               dataPost = response.body()!!
+                    model.save(counter.toString(), dataPost!!.description + "+++++" + dataPost!!.gifURL)
+                    casher++
 
-                model.save(counter.toString(), dataPost!!.description + "+++++" + dataPost!!.gifURL)
-                casher++
-
-                withContext(Dispatchers.Main){
-                    view.setDescription(dataPost!!.description)
-                    view.setImage(dataPost!!.gifURL)
+                    withContext(Dispatchers.Main){
+                        view.setDescription(dataPost!!.description)
+                        view.setImage(dataPost!!.gifURL)
+                    }
+                }
+                else {
+                    view.showErrorForPost()
                 }
             }
-            else {
-
-            }
         }
+
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -139,12 +150,12 @@ class MainPresenter(_view: MainInterface.View): MainInterface.Presenter {
             }
         if (capabilities != null) {
             when {
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
-                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
-                    return true
-                }
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
                     Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
+                    return true
+                }
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
                     return true
                 }
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> {

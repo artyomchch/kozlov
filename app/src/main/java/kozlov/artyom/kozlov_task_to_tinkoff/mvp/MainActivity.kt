@@ -1,13 +1,19 @@
 package kozlov.artyom.kozlov_task_to_tinkoff.mvp
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.drawable.Animatable2
 import android.graphics.drawable.Drawable
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.opengl.Visibility
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.datastore.core.DataStore
 import androidx.datastore.createDataStore
 import androidx.datastore.preferences.core.edit
@@ -60,16 +66,29 @@ class MainActivity : AppCompatActivity(), MainInterface.View {
        return preferences[dataStoreKey]
    }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        if (isOnline(baseContext)){
+            presenter = MainPresenter(this)
+            presenter!!.getDataPostSource(dataStore)
+        }
+        else{
+            invisibleProgressBar()
+            showError()
+        }
 
-        presenter = MainPresenter(this)
 
 
-        presenter!!.getDataPostSource(dataStore)
+
+        binding.buttonError.setOnClickListener{
+            finish()
+            startActivity(intent)
+        }
+
 
 
 
@@ -187,7 +206,59 @@ class MainActivity : AppCompatActivity(), MainInterface.View {
     }
 
     override fun showError() {
+        Glide.with(this)
+            .asGif()
+            .centerCrop()
+            .load(R.drawable.error)
+            .into(binding.imageView)
 
+        binding.description.setText("Произошла ошибка при загрузке данных. Проверьте подключение к сети.")
+        binding.next.visibility = View.GONE
+        binding.back.visibility = View.GONE
+        binding.buttonError.visibility = View.VISIBLE
+    }
+
+    override fun showErrorForPost() {
+        Glide.with(this)
+            .asGif()
+            .centerCrop()
+            .load(R.drawable.error)
+            .into(binding.imageView)
+
+        binding.description.setText("Произошла ошибка при загрузке данных. Проверьте подключение к сети. \n Нажмите далее, чтоб загузить следующий пост")
+
+
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    fun isOnline(context: Context): Boolean {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val capabilities =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+            } else {
+                TODO("VERSION.SDK_INT < M")
+            }
+        if (capabilities != null) {
+            when {
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
+                    return true
+                }
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
+                    return true
+                }
+
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
+                    return true
+                }
+            }
+        }
+        return false
     }
 
 

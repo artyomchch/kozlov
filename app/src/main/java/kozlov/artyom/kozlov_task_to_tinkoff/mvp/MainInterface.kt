@@ -17,14 +17,17 @@ interface MainInterface {
         fun visibleProgressBar()
         fun invisibleProgressBar()
         fun showError()
+        fun showErrorForPost()
+
 
 
     }
 
     interface Presenter{
         suspend fun getSecondPost()
-        fun getDataPostSource(data: DataStore<Preferences>)
         suspend fun getCashPost()
+        fun getDataPostSource(data: DataStore<Preferences>)
+
 
     }
 
