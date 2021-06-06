@@ -14,8 +14,15 @@ android {
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    //viewBinding
+
+    buildFeatures {
+        viewBinding = true
     }
 
     buildTypes {
@@ -46,6 +53,9 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
     implementation 'com.github.bumptech.glide:glide:4.12.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
+    implementation 'androidx.multidex:multidex:2.0.1'
+
+
 
     //circle button
     implementation 'com.github.markushi:circlebutton:1.1'
@@ -58,9 +68,24 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.3'
 
+    // Coroutine Lifecycle Scopes
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.3.1"
+
     //retrofit2
     implementation 'com.squareup.retrofit2:retrofit:2.7.1'
     implementation 'com.squareup.retrofit2:converter-gson:2.0.0'
 
+
+    //loaderTextView
+    implementation 'io.github.elye:loaderviewlibrary:3.0.0'
+
+
+    // Preferences DataStore
+    implementation "androidx.datastore:datastore-preferences:1.0.0-alpha04"
+
+
+    //klaxon
+    implementation 'com.beust:klaxon:5.5'
 
 }
